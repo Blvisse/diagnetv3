@@ -58,6 +58,10 @@ print("Reading Environmental Variables")
 # aws_secret_key=os.getenv("AWS_S3_PACS_SECRET_KEY")
 
 
+aws_access_key="AKIAQXQV2C3PO6BMIKWE"
+aws_secret_key="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"
+pacs_url="https://diagnosoftdicom.azurewebsites.net/pacs/instances"
+
 
 print(pacs_url)
 if (aws_access_key == None) or (aws_secret_key == None):
