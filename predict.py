@@ -264,17 +264,57 @@ def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2):
         
         return scan_file
         
-    else: 
-        print("Receving diffrent format image")
-
-        print("Enetreing Pipeline")
-        scan=scan_to_numpy(file_path)
+    else:
+        try:
+            print("Receving diffrent format image")
+    
+            print("Enetreing Pipeline")
+            scan=scan_to_numpy(file_path)
+            
+            
+            scan_np=np.array(scan)
+            scan_file=np.expand_dims(scan_np,axis=0)
+            print("Done Image Prrep piepline")
+            return scan_file
+            
+        except Exception as e:
+            print("Beginning image preprocessing")
         
-        scan_np=np.array(scan)
-        scan_file=np.expand_dims(scan_np,axis=0)
-        print("Done Image Prrep piepline")
+            new_filepath="downloads/processed/{}.DCM".format(p_name)
+            
+            test_image=[]
+            print("Reading DICOM image")
+            image=pydicom.dcmread(file_path)
+            # image.StudyInstanceUID='1.3.6.1.4.1.14519.5.2.1.7009.2404.315222469415623828162094912079'
+            # image.SeriesInstanceUID='1.3.6.1.4.1.14519.5.2.1.7009.2404.309111601391566216060061725328'
+            # image.SOPInstanceUID='1.3.6.1.4.1.14519.5.2.1.7009.2404.170420932819315718805816034120'
+            # image.StudyDate=date
+            image.StudyInstanceUID=generate_uid()
+            image.SeriesInstanceUID=generate_uid()
+            image.SOPInstanceUID=generate_uid()
+            image.PatientName=p_name
+            image.PatientID=str(inspection_code)
+            pydicom.dcmwrite(new_filepath,image)
+            print("Successfully Input patient detail")
+            image=image.pixel_array
+            cv2.imwrite('scans/dicom_files/{}.png'.format(p_name),image)
+            image=cv2.imread('scans/dicom_files/{}.png'.format(p_name))
+            image=Image.fromarray(image,'RGB')
+            image=image.resize((512,512))
+            test_image.append(np.array(image))  
+            test_image=np.array(test_image)
+            test_image=test_image/255
+            print("Done image prep ")
+            return test_image
         
-        return scan_file
+        # except Exception as e:
+        #     # Handle other unexpected exceptions
+        #     print("An unexpected error occurred.")
+        #     print("Exception:", e)
+        
+            
+        
+        
     
     
 def upload_image(path,inspection_code = int("1")):
