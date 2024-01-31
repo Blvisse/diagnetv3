@@ -262,7 +262,20 @@ def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2):
         scan_np=np.array(scan)
         scan_file=np.expand_dims(scan_np,axis=0)
         
-        return scan_file 
+        return scan_file
+        
+    else: 
+        print("Receving diffrent format image")
+
+        print("Enetreing Pipeline")
+        scan=scan_to_numpy(file_path)
+        
+        scan_np=np.array(scan)
+        scan_file=np.expand_dims(scan_np,axis=0)
+        print("Done Image Prrep piepline")
+        
+        return scan_file
+    
     
 def upload_image(path,inspection_code = int("1")):
     
@@ -400,8 +413,9 @@ def predict_base64_image(name,patient_name,inspection_code,contents):
     print("Stored Dicom file")
     model,pred_model=get_model()
     image=preprocess_image(file_path,patient_name,inspection_code=inspection_code)
+    print(image)
     # anomaly_image=preprocess_image(file_path)
-    upload_image(file_path,inspection_code)
+    # upload_image(file_path,inspection_code)
     classes=prediction_scan(image[0],patient_name)
     # classes=prediction_scan(image)
     # anomaly_analysis=check_anomaly(anomaly_image)
