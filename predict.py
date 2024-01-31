@@ -296,8 +296,12 @@ def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2):
         pydicom.dcmwrite(new_filepath,image)
         print("Successfully Input patient detail")
         image=image.pixel_array
-        cv2.imwrite('scans/dicom_files/{}.png'.format(p_name),image)
-        image=cv2.imread('scans/dicom_files/{}.png'.format(p_name))
+        print(image)
+        cv2.imwrite('scans/{}.png'.format(p_name),image)
+        
+        print("Image 2")
+        image=cv2.imread('scans/{}.png'.format(p_name))
+        print(image)
         image=Image.fromarray(image,'RGB')
         image=image.resize((512,512))
         test_image.append(np.array(image))  
