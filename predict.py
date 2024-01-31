@@ -54,13 +54,9 @@ print(date)
 
 load_dotenv()
 print("Reading Environmental Variables")
-# aws_access_key=os.getenv("AWS_S3_PACS_ACCESS_KEY")
-# aws_secret_key=os.getenv("AWS_S3_PACS_SECRET_KEY")
-
-
-aws_access_key="AKIAQXQV2C3PO6BMIKWE"
-aws_secret_key="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"
-pacs_url="https://diagnosoftdicom.azurewebsites.net/pacs/instances"
+aws_access_key=os.getenv("AWS_S3_PACS_ACCESS_KEY")
+aws_secret_key=os.getenv("AWS_S3_PACS_SECRET_KEY")
+pacs_url=os.getenv("URL")
 
 
 print(pacs_url)
