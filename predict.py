@@ -34,7 +34,7 @@ try:
     from pydicom.uid import generate_uid
     from PIL import Image
     
-    print("Successfully Imported Libraries")
+    print("Successfully Imported Libraries New")
     
 
 except ImportError as ie:
