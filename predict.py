@@ -453,7 +453,7 @@ def predict_base64_image(name,patient_name,inspection_code,contents):
     print("Stored Dicom file")
     model,pred_model=get_model()
     image=preprocess_image(file_path,patient_name,inspection_code=inspection_code)
-    print(image)
+    # print(image)
     # anomaly_image=preprocess_image(file_path)
     # upload_image(file_path,inspection_code)
     classes=prediction_scan(image[0],patient_name)
