@@ -141,7 +141,7 @@ def get_model():
         print("Details: {}".format(e))
         exit(1)
     
-model,pred_model=get_model()      
+      
 
 def IsJson(content):
     try:
@@ -331,6 +331,7 @@ def prediction_scan(img,p_name="None"):
     
     #expand dimensions
     #predict
+    model,pred_model=get_model()
     scan_image=img
     img=np.expand_dims(img,axis=0)
     print("Spooling up model")
@@ -409,7 +410,6 @@ def predict_base64_image(name,patient_name,inspection_code,contents,file_type):
     with open(fd,'wb') as f:
         f.write(base64.b64decode(contents))
     print("Stored Dicom file")
-    model,pred_model=get_model()
     image=preprocess_image(file_path,patient_name,inspection_code=inspection_code)
     # print(image)
     if file_type.lower() == "dcm":
