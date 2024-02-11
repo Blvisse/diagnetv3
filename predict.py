@@ -1,10 +1,8 @@
 try:
-    import os 
-
+    import os
     import base64
     import tempfile
     import numpy as np
-
     import tensorflow as tf
     import pydicom
     import cv2
@@ -32,8 +30,7 @@ try:
     from dotenv import load_dotenv
     import scipy
     from pydicom.uid import generate_uid
-    from PIL import Image
-    
+    from PIL import Image    
     print("Successfully Imported Libraries News")
     
 
@@ -42,18 +39,14 @@ except ImportError as ie:
     print("Details: {}".format(ie))
     exit(1)
     
-
-
-
-
 #get current time at prediction
 now=datetime.now()
 date = now.strftime("%Y%d%m")
 print(date)
 
-
 load_dotenv()
 print("Reading Environmental Variables")
+
 aws_access_key=os.getenv("AWS_S3_PACS_ACCESS_KEY")
 aws_secret_key=os.getenv("AWS_S3_PACS_SECRET_KEY")
 pacs_url=os.getenv("URL")
@@ -148,9 +141,7 @@ def get_model():
         print("Details: {}".format(e))
         exit(1)
     
-    
 model,pred_model=get_model()      
-
 
 def IsJson(content):
     try:
@@ -224,11 +215,24 @@ def scan_to_numpy(img_path,img_width=512,img_height=512,grayscale=False):
     # transformed_img.append(prep_scan)
     
     return prep_scan
-    
 
-def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2):
-    if file_path.lower().endswith(".dcm"):
+def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2,file_type="DCM"):
+    if file_type.lower() == "dcm":
         print("Beginning image preprocessing")
+        dicom_file_folder="scans/dicom_files/"
+        processed_folder="downloads/processed/"
+        
+        if not os.path.exists(dicom_file_folder):
+            os.makedirs(dicom_file_folder)
+            print("Dicom Directory created successfully.")
+        else:
+            print("Directory already exists.")
+            
+        if not os.path.exists(processed_folder):
+            os.makedirs(processed_folder)
+            print("Processed Directory created successfully.")
+        else:
+            print("Directory already exists.")
         
         new_filepath="downloads/processed/{}.DCM".format(p_name)
         
@@ -246,9 +250,13 @@ def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2):
         image.PatientID=str(inspection_code)
         pydicom.dcmwrite(new_filepath,image)
         print("Successfully Input patient detail")
+        # print(image)
+        # print(image.pixel_array)
         image=image.pixel_array
+        print(image)
         cv2.imwrite('scans/dicom_files/{}.png'.format(p_name),image)
         image=cv2.imread('scans/dicom_files/{}.png'.format(p_name))
+        print(image)
         image=Image.fromarray(image,'RGB')
         image=image.resize((512,512))
         test_image.append(np.array(image))  
@@ -256,71 +264,17 @@ def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2):
         test_image=test_image/255
         print("Done image prep ")
         return test_image
-    if file_path.lower().endswith(".png"):
         
+    elif file_type.lower() != "dcm":
+        print("Processing Different image type")
         scan=scan_to_numpy(file_path)
         scan_np=np.array(scan)
         scan_file=np.expand_dims(scan_np,axis=0)
+        print("Done")
         
-        return scan_file
-        
-    else:
-        # try:
-        #     print("Receving diffrent format image")
+        return scan_file        
     
-        #     print("Enetreing Pipeline")
-        #     scan=scan_to_numpy(file_path)
-            
-            
-        #     scan_np=np.array(scan)
-        #     scan_file=np.expand_dims(scan_np,axis=0)
-        #     print("Done Image Prrep piepline")
-        #     return scan_file
-        # else
-        print("Beginning image preprocessing")
-        
-        new_filepath="downloads/{}.DCM".format(p_name)
-        
-        test_image=[]
-        print("Reading DICOM image")
-        image=pydicom.dcmread(file_path)
-        # image.StudyInstanceUID='1.3.6.1.4.1.14519.5.2.1.7009.2404.315222469415623828162094912079'
-        # image.SeriesInstanceUID='1.3.6.1.4.1.14519.5.2.1.7009.2404.309111601391566216060061725328'
-        # image.SOPInstanceUID='1.3.6.1.4.1.14519.5.2.1.7009.2404.170420932819315718805816034120'
-        # image.StudyDate=date
-        image.StudyInstanceUID=generate_uid()
-        image.SeriesInstanceUID=generate_uid()
-        image.SOPInstanceUID=generate_uid()
-        image.PatientName=p_name
-        image.PatientID=str(inspection_code)
-        pydicom.dcmwrite(new_filepath,image)
-        print("Successfully Input patient detail")
-        image=image.pixel_array
-        print(image)
-        cv2.imwrite('scans/{}.png'.format(p_name),image)
-        
-        print("Image 2")
-        image=cv2.imread('scans/{}.png'.format(p_name))
-        print(image)
-        image=Image.fromarray(image,'RGB')
-        image=image.resize((512,512))
-        test_image.append(np.array(image))  
-        test_image=np.array(test_image)
-        test_image=test_image/255
-        print("Done image prep ")
-        return test_image
-        
-        
-        # except Exception as e:
-        #     # Handle other unexpected exceptions
-        #     print("An unexpected error occurred.")
-        #     print("Exception:", e)
-        
-            
-        
-        
-    
-    
+
 def upload_image(path,inspection_code = int("1")):
     
     f=open(path,'rb')
@@ -368,7 +322,7 @@ def upload_image(path,inspection_code = int("1")):
         print(str(value))
         print("Unable to connect to Orthanc Server")
         print(e)
-    
+   
 
 def prediction_scan(img,p_name="None"):
     #adding the prediction model
@@ -449,7 +403,7 @@ def prediction_scan(img,p_name="None"):
         print("No TB detected")
         return [{'text':text,'class':pred_class,'image':img_to_base64_str(image)}]
     
-def predict_base64_image(name,patient_name,inspection_code,contents):
+def predict_base64_image(name,patient_name,inspection_code,contents,file_type):
     print("receiving image")
     fd,file_path=tempfile.mkstemp()
     with open(fd,'wb') as f:
@@ -458,8 +412,9 @@ def predict_base64_image(name,patient_name,inspection_code,contents):
     model,pred_model=get_model()
     image=preprocess_image(file_path,patient_name,inspection_code=inspection_code)
     # print(image)
+    if file_type.lower() == "dcm":
+        upload_image(file_path,inspection_code)
     # anomaly_image=preprocess_image(file_path)
-    # upload_image(file_path,inspection_code)
     classes=prediction_scan(image[0],patient_name)
     # classes=prediction_scan(image)
     # anomaly_analysis=check_anomaly(anomaly_image)
@@ -469,13 +424,16 @@ def predict_base64_image(name,patient_name,inspection_code,contents):
 if __name__ == '__main__':
     
     file_path='downloads/Final.DCM'
-    scan_path="data/unzipped_images/shenzhen_images/images/images/CHNCXR_0001_0.png"
+    scan_path="scans/dicom_files/Blaise_Papa.png"
+    file_type="dcm"
     
-    image=preprocess_image(file_path,'Blaise_Papa')
+    image=preprocess_image(scan_path,'Blaise_Papa',file_type="png")
+    if file_type.lower() == "dcm":
+        upload_image(file_path,12)
     # anomaly_image=preprocess_image(file_path)
     # print(image)
-    upload_image(file_path,982)
+    # upload_image(file_path,982)
     # print(check_anomaly(anomaly_image))
-    prediction_scan(image[0],"Blaise_Papa")
+    # prediction_scan(image[0],"Blaise_Papa")
     # print(classes)
     print("done")
