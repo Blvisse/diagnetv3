@@ -216,8 +216,8 @@ def scan_to_numpy(img_path,img_width=512,img_height=512,grayscale=False):
     
     return prep_scan
 
-def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2,file_type="DCM"):
-    if file_type.lower() == "dcm":
+def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2,file_type="Dicom"):
+    if file_type.lower() == "dicom":
         print("Beginning image preprocessing")
         dicom_file_folder="scans/dicom_files/"
         processed_folder="downloads/processed/"
@@ -265,7 +265,7 @@ def preprocess_image(file_path,p_name="None",patient_id=1,inspection_code=2,file
         print("Done image prep ")
         return test_image
         
-    elif file_type.lower() != "dcm":
+    elif file_type.lower() != "dicom":
         print("Processing Different image type")
         scan=scan_to_numpy(file_path)
         scan_np=np.array(scan)
@@ -412,7 +412,7 @@ def predict_base64_image(name,patient_name,inspection_code,contents,file_type):
     print("Stored Dicom file")
     image=preprocess_image(file_path,patient_name,inspection_code=inspection_code)
     # print(image)
-    if file_type.lower() == "dcm":
+    if file_type.lower() == "dicom":
         upload_image(file_path,inspection_code)
     # anomaly_image=preprocess_image(file_path)
     classes=prediction_scan(image[0],patient_name)
@@ -425,10 +425,10 @@ if __name__ == '__main__':
     
     file_path='downloads/Final.DCM'
     scan_path="scans/dicom_files/Blaise_Papa.png"
-    file_type="dcm"
+    file_type="dicom"
     
     image=preprocess_image(scan_path,'Blaise_Papa',file_type="png")
-    if file_type.lower() == "dcm":
+    if file_type.lower() == "dicom":
         upload_image(file_path,12)
     # anomaly_image=preprocess_image(file_path)
     # print(image)
